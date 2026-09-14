@@ -28,3 +28,8 @@ Detalhes pensados para celular:
 - imagens com loading="lazy"
 - parallax desativado no celular
 - suporte a prefers-reduced-motion
+
+SEÇÕES EM TELA CHEIA
+- As seções principais usam min-height: 100svh / 100dvh no CSS.
+- Se o conteúdo ultrapassar a tela (ex.: galeria ou RSVP), a seção cresce normalmente.
+- Para voltar ao comportamento por conteúdo, remova o min-height do seletor section em css/styles.css.

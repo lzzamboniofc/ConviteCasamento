@@ -45,7 +45,15 @@ img { display: block; width: 100%; max-width: 100%; }
 button, input, select, textarea { font: inherit; }
 
 .container { width: min(100%, var(--container)); margin-inline: auto; }
-section { position: relative; padding: var(--section-y) var(--padding-x); }
+section {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: var(--section-y) var(--padding-x);
+}
+section > .container { width: min(100%, var(--container)); }
+
 .serif { font-family: "Cormorant Garamond", serif; }
 
 .eyebrow {
@@ -57,43 +65,55 @@ section { position: relative; padding: var(--section-y) var(--padding-x); }
   text-transform: uppercase;
 }
 
-/* NAV: pensada primeiro para toque */
+/* NAV: compacta no mobile, sem rolagem horizontal */
 .floating-nav {
   position: fixed;
   z-index: 50;
-  top: 10px;
+  top: max(10px, env(safe-area-inset-top));
   left: 12px;
   right: 12px;
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  padding: 7px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 3px;
+  padding: 6px;
   border: 1px solid rgba(255,255,255,.45);
   border-radius: 999px;
-  background: rgba(255,255,255,.72);
+  background: rgba(255,255,255,.76);
   box-shadow: 0 10px 34px rgba(54,50,47,.09);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  scrollbar-width: none;
   opacity: 0;
   pointer-events: none;
   transform: translateY(-8px);
   transition: opacity .35s ease, transform .35s ease;
 }
-.floating-nav::-webkit-scrollbar { display: none; }
 .floating-nav.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
 .floating-nav a {
-  flex: 0 0 auto;
-  min-height: 40px;
-  display: inline-flex;
+  min-width: 0;
+  min-height: 42px;
+  display: flex;
   align-items: center;
-  padding: 0 12px;
+  justify-content: center;
   border-radius: 999px;
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: .11em;
+  color: var(--cor-texto);
   text-decoration: none;
-  text-transform: uppercase;
+  transition: background-color .25s ease, color .25s ease, transform .25s ease;
+}
+.floating-nav a:active {
+  transform: scale(.94);
+  background: color-mix(in srgb, var(--cor-principal) 10%, transparent);
+}
+.nav-icon {
+  width: 19px;
+  height: 19px;
+  fill: currentColor;
+  opacity: .82;
+}
+.nav-label { display: none; }
+
+/* Âncoras: deixam o título visível abaixo do menu fixo */
+#nosso-sim, #historia, #cerimonia, #galeria, #rsvp {
+  scroll-margin-top: 76px;
 }
 
 /* HERO */
@@ -161,6 +181,9 @@ section { position: relative; padding: var(--section-y) var(--padding-x); }
   text-decoration: none;
   text-transform: uppercase;
   animation: cueFloat 2.4s ease-in-out infinite;
+}
+.scroll-cue.revel{
+  color: #4d5c4b;
 }
 .replace-note {
   display: inline-block;
@@ -256,6 +279,17 @@ section { position: relative; padding: var(--section-y) var(--padding-x); }
 .gifts .button:hover span { color: var(--cor-superficie); }
 .gifts .button:hover::before { background: var(--cor-principal); }
 
+/*
+  SEÇÕES EM TELA CHEIA
+  --------------------
+  Todas as sections principais têm no mínimo a altura visível do aparelho.
+  Se o conteúdo for maior (galeria/RSVP), a seção cresce naturalmente.
+  Isso evita que uma seção curta deixe a próxima aparecer na mesma tela.
+*/
+@supports (min-height: 100dvh) {
+  section { min-height: 100dvh; }
+}
+
 /* GALERIA: uma coluna por padrão para leitura confortável no celular */
 .gallery { background: var(--cor-superficie); text-align: center; }
 .gallery-grid { margin-top: 34px; display: grid; gap: 12px; }
@@ -268,8 +302,8 @@ section { position: relative; padding: var(--section-y) var(--padding-x); }
 }
 
 /* DRESS CODE */
-.split-section { display: grid; }
-.split-image { min-height: 390px; background: url("../assets/images/foto-detalhe.svg") center/cover no-repeat; }
+.split-section { display: grid; align-items: stretch; padding: 0; }
+.split-image { min-height: 50svh; background: url("../assets/images/foto-detalhe.svg") center/cover no-repeat; }
 .split-copy { display: flex; align-items: center; padding: 64px var(--padding-x); background: var(--cor-fundo); }
 .split-copy-inner { max-width: 520px; margin-inline: auto; }
 .split-copy h2 { margin: 0 0 20px; font-size: clamp(42px, 13vw, 64px); font-weight: 400; line-height: 1; }
@@ -313,7 +347,7 @@ section { position: relative; padding: var(--section-y) var(--padding-x); }
 
 /* RODAPÉ */
 footer {
-  min-height: 460px;
+  min-height: 100svh;
   display: grid;
   place-items: center;
   padding: 56px var(--padding-x);
@@ -337,8 +371,19 @@ footer p { margin-top: 24px; font-size: 9px; letter-spacing: .14em; text-transfo
 /* TABLET */
 @media (min-width: 640px) {
   :root { --padding-x: 28px; --section-y: 88px; --raio: 24px; }
-  .floating-nav { left: 50%; right: auto; width: auto; max-width: calc(100vw - 32px); transform: translate(-50%, -8px); }
+  .floating-nav {
+    left: 50%;
+    right: auto;
+    width: auto;
+    grid-template-columns: repeat(5, auto);
+    gap: 4px;
+    transform: translate(-50%, -8px);
+  }
   .floating-nav.visible { transform: translate(-50%, 0); }
+  .floating-nav a { gap: 7px; padding: 0 13px; }
+  .nav-icon { width: 16px; height: 16px; }
+  .nav-label { display: inline; font-size: 9px; font-weight: 500; letter-spacing: .10em; text-transform: uppercase; white-space: nowrap; }
+  #nosso-sim, #historia, #cerimonia, #galeria, #rsvp { scroll-margin-top: 86px; }
   .hero { padding-inline: 28px; }
   .hero-kicker { max-width: none; }
   .gallery-grid { grid-template-columns: repeat(2, 1fr); }
@@ -353,8 +398,8 @@ footer p { margin-top: 24px; font-size: 9px; letter-spacing: .14em; text-transfo
   .hero h1 { font-size: clamp(88px, 11vw, 138px); }
   .story-grid { grid-template-columns: 1.05fr .95fr; gap: 64px; align-items: center; }
   .photo-frame { padding: 16px; }
-  .split-section { grid-template-columns: 1fr 1fr; min-height: 620px; }
-  .split-image { min-height: 620px; }
+  .split-section { grid-template-columns: 1fr 1fr; min-height: 100svh; }
+  .split-image { min-height: 100%; }
   .split-copy { padding: 80px clamp(34px, 7vw, 100px); }
   .gallery-grid { grid-template-columns: repeat(12, 1fr); grid-auto-rows: 82px; gap: 14px; }
   .gallery-grid img { height: 100%; }
