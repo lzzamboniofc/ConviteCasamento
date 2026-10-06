@@ -1,0 +1,1 @@
+{"name":"convite-casamento-liliane-igor","version":"1.0.0","private":true,"type":"module","description":"Convite digital de casamento com Node.js para desenvolvimento e GitHub Pages em produção.","scripts":{"dev":"node server.mjs","start":"node server.mjs","check":"node scripts/check-pages.mjs"},"engines":{"node":">=20"}}
