@@ -1,0 +1,1 @@
+/* Personalização de textos e tema é aplicada por js/main.js a partir de WEDDING_CONFIG. */
