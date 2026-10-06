@@ -1,0 +1,1 @@
+/* Mídia opcional. A música está desativada enquanto nenhum arquivo definitivo estiver configurado. */
