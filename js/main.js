@@ -1,44 +1,19 @@
-const revealObserver = new IntersectionObserver((entries) => {
-  entries.forEach((entry) => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('is-visible');
-      revealObserver.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.12, rootMargin: '0px 0px -24px 0px' });
-
-document.querySelectorAll('.reveal').forEach((el) => revealObserver.observe(el));
-
-const nav = document.querySelector('.floating-nav');
-const hero = document.querySelector('.hero');
-
-if (nav && hero) {
-  const navObserver = new IntersectionObserver(([entry]) => {
-    nav.classList.toggle('visible', !entry.isIntersecting);
-  }, { threshold: 0.15 });
-  navObserver.observe(hero);
-}
-
-// Parallax apenas em desktop e somente quando o usuário permite movimento.
-if (window.matchMedia('(min-width: 820px) and (prefers-reduced-motion: no-preference)').matches && hero) {
-  window.addEventListener('scroll', () => {
-    const y = Math.min(window.scrollY * 0.12, 70);
-    hero.style.backgroundPosition = `center calc(50% + ${y}px)`;
-  }, { passive: true });
-}
-
-const giftButton = document.querySelector('[data-gift-demo]');
-if (giftButton) {
-  giftButton.addEventListener('click', (event) => {
-    event.preventDefault();
-    alert('Substitua este link pela sua lista de presentes.');
-  });
-}
-
-const rsvpForm = document.querySelector('.rsvp-form');
-if (rsvpForm) {
-  rsvpForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-    alert('Presença registrada na demonstração!');
-  });
-}
+(() => {
+const C=window.WEDDING_CONFIG||{},$=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)],get=(o,p)=>p.split('.').reduce((a,k)=>a?.[k],o),asset=v=>typeof v==='string'?v:(matchMedia('(max-width:767px)').matches?v?.mobile:v?.desktop)||v?.desktop||v?.mobile||'',cssUrl=v=>v?`url("${asset(v)}")`:'none';
+const theme=window.WEDDING_THEMES?.[C.themePreset]||{},vars={background:'--bg',surface:'--surface',surfaceAlt:'--surface-alt',text:'--text',muted:'--muted',accent:'--accent',accentDark:'--accent-dark',accentSoft:'--accent-soft',warm:'--warm',line:'--line',heroText:'--hero-text'};Object.entries(vars).forEach(([k,v])=>theme[k]&&document.documentElement.style.setProperty(v,theme[k]));if(C.fonts?.title)document.documentElement.style.setProperty('--title-font',C.fonts.title);if(C.fonts?.body)document.documentElement.style.setProperty('--body-font',C.fonts.body);
+$$('[data-text]').forEach(el=>{const v=get(C,el.dataset.text);if(v!=null)el.textContent=v});
+const params=new URLSearchParams(location.search),guest=params.get(C.opening?.guestQueryParam||'convidado');if(guest){$('#personalGreetingLabel').textContent=C.opening?.guestPrefix||'Convite destinado a';$('#personalGreeting').textContent=guest;const b=$('#heroGuestBadge');if(b){b.hidden=false;b.textContent=guest}const n=$('#rsvpName');if(n)n.value=guest}
+const opening=$('#opening'),header=$('#siteHeader'),openSite=()=>{opening?.setAttribute('hidden','');document.body.classList.remove('is-locked');header?.classList.add('is-visible')};if(C.opening?.enabled===false)openSite();else $('#openInvitation')?.addEventListener('click',openSite);
+const nav=$('#siteNav'),toggle=$('#navToggle'),closeNav=()=>{nav?.classList.remove('is-open');toggle?.setAttribute('aria-expanded','false')};toggle?.addEventListener('click',()=>{const on=nav?.classList.toggle('is-open');toggle.setAttribute('aria-expanded',String(!!on))});$$('a',nav).forEach(a=>a.addEventListener('click',closeNav));document.addEventListener('keydown',e=>e.key==='Escape'&&closeNav());
+if($('#heroImage'))$('#heroImage').src=asset(C.hero?.image);if($('#storyImage'))$('#storyImage').src=asset(C.story?.image);if($('#rsvpImage'))$('#rsvpImage').src=asset(C.images?.rsvp);
+const target=new Date(C.wedding?.dateISO||0).getTime(),tick=()=>{const d=Math.max(0,target-Date.now()),v={days:Math.floor(d/86400000),hours:Math.floor(d/3600000)%24,minutes:Math.floor(d/60000)%60,seconds:Math.floor(d/1000)%60};Object.entries(v).forEach(([k,n])=>{const e=$(`[data-count="${k}"]`);if(e)e.textContent=String(n).padStart(2,'0')})};if(target){tick();setInterval(tick,1000)}
+(C.story?.paragraphs||[]).forEach(t=>{const p=document.createElement('p');p.textContent=t;$('#storyParagraphs')?.appendChild(p)});
+(C.events||[]).forEach((e,i)=>{const el=document.createElement('article');el.className='event-card';el.innerHTML=`<div class="event-card__media" style="--event-image:${cssUrl(e.image)}"></div><div class="event-card__body"><span class="event-card__index">0${i+1} · ${e.label}</span><h3>${e.venue}</h3><p><strong>${e.time}</strong></p><address>${e.address}</address>${e.mapsUrl?`<a href="${e.mapsUrl}" target="_blank" rel="noopener">${e.mapsLabel||'Abrir mapa'} →</a>`:''}</div>`;$('#eventGrid')?.appendChild(el)});
+if($('#programacao'))$('#programacao').style.setProperty('--schedule-bg-image',cssUrl(C.schedule?.backgroundImage));(C.schedule?.items||[]).forEach(it=>{const r=document.createElement('div');r.className='timeline-item';r.innerHTML=`<time>${it.time}</time><div><h3>${it.title}</h3><p>${it.text}</p></div>`;$('#timeline')?.appendChild(r)});
+const imgs=C.gallery?.images||[],grid=$('#galleryGrid'),box=$('#lightbox'),li=$('#lightboxImage'),lc=$('#lightboxCaption');let cur=0;imgs.forEach((im,i)=>{const b=document.createElement('button');b.className='gallery-item';b.type='button';b.dataset.index=i;b.innerHTML=`<img src="${asset(im.src??im)}" alt="${im.alt||''}" loading="lazy"><span>${im.caption||`Foto ${i+1}`}</span>`;grid?.appendChild(b)});const show=i=>{if(!imgs.length)return;cur=(i+imgs.length)%imgs.length;const im=imgs[cur];li.src=asset(im.src??im);li.alt=im.alt||'';lc.textContent=im.caption||''},open=i=>{show(i);box?.classList.add('is-open')},close=()=>box?.classList.remove('is-open');grid?.addEventListener('click',e=>{const b=e.target.closest('.gallery-item');if(b)open(+b.dataset.index)});$('#lightboxClose')?.addEventListener('click',close);$('#lightboxPrev')?.addEventListener('click',()=>show(cur-1));$('#lightboxNext')?.addEventListener('click',()=>show(cur+1));document.addEventListener('keydown',e=>{if(!box?.classList.contains('is-open'))return;if(e.key==='Escape')close();if(e.key==='ArrowLeft')show(cur-1);if(e.key==='ArrowRight')show(cur+1)});
+(C.dressCode?.palette||[]).forEach(c=>{const s=document.createElement('span');s.style.background=c;$('#dressPalette')?.appendChild(s)});const icons={car:'↗',clock:'◷',camera:'◎',heart:'♡'};(C.guestInfo?.items||[]).forEach(it=>{const e=document.createElement('article');e.className='info-card';e.innerHTML=`<span class="info-card__icon">${icons[it.icon]||'•'}</span><h3>${it.title}</h3><p>${it.text}</p>`;$('#infoGrid')?.appendChild(e)});
+(C.faq?.items||[]).forEach(it=>{const w=document.createElement('div');w.className='faq-item';w.innerHTML=`<button class="faq-question" type="button" aria-expanded="false"><span>${it.question}</span><span>+</span></button><div class="faq-answer"><p>${it.answer}</p></div>`;const b=$('.faq-question',w);b.addEventListener('click',()=>{const on=w.classList.toggle('is-open');b.setAttribute('aria-expanded',String(on));b.lastElementChild.textContent=on?'−':'+'});$('#faqList')?.appendChild(w)});
+const lim=Math.max(1,parseInt(params.get(C.rsvp?.guestLimitQueryParam||'lugares')||C.rsvp?.maxGuestsDefault||1,10)),count=$('#guestCount');if(count){count.max=lim;count.value=1}if($('#rsvpLimitNote'))$('#rsvpLimitNote').textContent=lim>1?`Este convite permite confirmar até ${lim} pessoas.`:'Este convite é individual.';
+$('#rsvpForm')?.addEventListener('submit',async e=>{e.preventDefault();const fd=new FormData(e.currentTarget),nome=fd.get('nome')||'',pres=fd.get('presenca')||'',qtd=fd.get('convidados')||1,msg=fd.get('mensagem')||'',st=$('#formStatus');if(!pres){st.textContent='Selecione se você estará presente.';return}const text=[C.rsvp?.baseMessage||'Olá!',`Nome: ${nome}`,`Resposta: ${pres}`,`Pessoas: ${qtd}`,msg&&`Mensagem: ${msg}`].filter(Boolean).join('\n');if(C.rsvp?.mode==='whatsapp'&&C.rsvp?.whatsappNumber){window.open(`https://wa.me/${C.rsvp.whatsappNumber}?text=${encodeURIComponent(text)}`,'_blank','noopener');st.textContent='Abrimos o WhatsApp para concluir sua confirmação.'}else if(C.rsvp?.formAction){try{const r=await fetch(C.rsvp.formAction,{method:'POST',body:fd,headers:{Accept:'application/json'}});if(!r.ok)throw 0;st.textContent=C.rsvp.successMessage||'Confirmação recebida.'}catch{st.textContent='Não foi possível enviar. Tente novamente.'}}else st.textContent=C.rsvp?.successMessage||'Confirmação recebida.'});
+[['historia',C.story?.enabled],['programacao',C.schedule?.enabled],['galeria',C.gallery?.enabled],['dress-code',C.dressCode?.enabled],['informacoes',C.guestInfo?.enabled],['duvidas',C.faq?.enabled],['rsvp',C.rsvp?.enabled]].forEach(([id,on])=>{if(on===false)document.getElementById(id)?.remove()});
+})();
